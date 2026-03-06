@@ -24,3 +24,5 @@ class MentalHealthClassifier(nn.Module):
         return logits
 
 # Loss: CrossEntropyLoss | Regularization: Dropout(p=0.3)
+
+# num_classes=3: anxiety, depression, neutral
