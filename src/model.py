@@ -22,3 +22,5 @@ class MentalHealthClassifier(nn.Module):
         cls_output = self.dropout(cls_output)
         logits = self.classifier(cls_output)
         return logits
+
+# Loss: CrossEntropyLoss | Regularization: Dropout(p=0.3)
