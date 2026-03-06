@@ -66,6 +66,10 @@ python src/train.py --lr 2e-5 --epochs 4 --batch_size 16 --dropout 0.3
 
 ---
 
+
+## 🔢 Confusion Matrix
+![Confusion Matrix](assets/confusion_matrix.png)
+
 ## 🏗️ Model Architecture
 - **Base:** BERT-base-uncased (110M parameters)
 - **Head:** Linear(768 → 3 classes)
