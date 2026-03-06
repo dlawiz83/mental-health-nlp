@@ -94,3 +94,8 @@ if __name__ == "__main__":
     train, val, test, le = build_dataset()
     print(f"Train: {len(train)} | Val: {len(val)} | Test: {len(test)}")
     print(f"Labels: {list(le.classes_)}")
+
+def filter_short_posts(df, min_words=5):
+    """Remove posts shorter than min_words words."""
+    df = df[df["clean_text"].apply(lambda x: len(x.split()) >= min_words)]
+    return df.reset_index(drop=True)
