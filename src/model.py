@@ -26,3 +26,5 @@ class MentalHealthClassifier(nn.Module):
 # Loss: CrossEntropyLoss | Regularization: Dropout(p=0.3)
 
 # num_classes=3: anxiety, depression, neutral
+
+# dropout=0.3 reduces overfitting on small datasets
