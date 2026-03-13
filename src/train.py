@@ -11,11 +11,11 @@ import argparse
 from model import MentalHealthClassifier
 from preprocess import build_dataset
 
-# Set seeds for reproducibility
 torch.manual_seed(42)
 np.random.seed(42)
 if torch.cuda.is_available():
     torch.cuda.manual_seed_all(42)
+
 
 class MentalHealthDataset(Dataset):
     def __init__(self, texts, labels, tokenizer, max_length=128):
@@ -41,6 +41,7 @@ class MentalHealthDataset(Dataset):
             "label": torch.tensor(self.labels[idx], dtype=torch.long)
         }
 
+
 def train_epoch(model, loader, optimizer, scheduler, criterion, device):
     model.train()
     total_loss, all_preds, all_labels = 0, [], []
@@ -60,6 +61,7 @@ def train_epoch(model, loader, optimizer, scheduler, criterion, device):
         all_labels.extend(labels.cpu().numpy())
     return total_loss / len(loader), f1_score(all_labels, all_preds, average="macro")
 
+
 def eval_epoch(model, loader, criterion, device):
     model.eval()
     total_loss, all_preds, all_labels = 0, [], []
@@ -75,28 +77,31 @@ def eval_epoch(model, loader, criterion, device):
             all_labels.extend(labels.cpu().numpy())
     return total_loss / len(loader), f1_score(all_labels, all_preds, average="macro")
 
+
 def main(lr=2e-5, epochs=4, batch_size=16, dropout=0.3):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     wandb.init(
         project="mental-health-nlp",
         config={"lr": lr, "epochs": epochs,
-                "batch_size": batch_size, "dropout": dropout}
+                "batch_size": batch_size, "dropout": dropout,
+                "dataset": "real-reddit-27924-samples",
+                "num_classes": 2}
     )
 
-    train, val, test, le = build_dataset()
+    train, val, test = build_dataset()
     tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 
     train_loader = DataLoader(
-        MentalHealthDataset(train["clean_text"], train["label_encoded"], tokenizer),
+        MentalHealthDataset(train["clean_text"], train["label"], tokenizer),
         batch_size=batch_size, shuffle=True
     )
     val_loader = DataLoader(
-        MentalHealthDataset(val["clean_text"], val["label_encoded"], tokenizer),
+        MentalHealthDataset(val["clean_text"], val["label"], tokenizer),
         batch_size=batch_size, shuffle=False
     )
 
-    model = MentalHealthClassifier(num_classes=3, dropout=dropout).to(device)
+    model = MentalHealthClassifier(num_classes=2, dropout=dropout).to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = AdamW(model.parameters(), lr=lr, weight_decay=0.01)
     scheduler = get_linear_schedule_with_warmup(
@@ -115,8 +120,8 @@ def main(lr=2e-5, epochs=4, batch_size=16, dropout=0.3):
         )
         val_loss, val_f1 = eval_epoch(model, val_loader, criterion, device)
 
-        wandb.log({"train_loss": train_loss, "train_f1": train_f1,
-                   "val_loss": val_loss, "val_f1": val_f1})
+        wandb.log({"epoch": epoch+1, "train_loss": train_loss,
+                   "train_f1": train_f1, "val_loss": val_loss, "val_f1": val_f1})
 
         print(f"Epoch {epoch+1} | Train Loss: {train_loss:.4f} | "
               f"Train F1: {train_f1:.4f} | Val Loss: {val_loss:.4f} | "
@@ -135,6 +140,7 @@ def main(lr=2e-5, epochs=4, batch_size=16, dropout=0.3):
                 break
 
     wandb.finish()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

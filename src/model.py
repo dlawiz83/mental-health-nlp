@@ -3,9 +3,12 @@ import torch.nn as nn
 from transformers import BertModel
 
 class MentalHealthClassifier(nn.Module):
-    """BERT-based classifier for mental health signal detection."""
-
-    def __init__(self, num_classes=3, dropout=0.3):
+    """BERT-based classifier for mental health signal detection.
+    
+    Fine-tunes BERT-base-uncased (110M parameters) for binary
+    classification of Reddit posts: neutral vs mental_health.
+    """
+    def __init__(self, num_classes=2, dropout=0.3):
         super(MentalHealthClassifier, self).__init__()
         self.bert = BertModel.from_pretrained("bert-base-uncased")
         self.dropout = nn.Dropout(dropout)
@@ -20,11 +23,8 @@ class MentalHealthClassifier(nn.Module):
         # Use [CLS] token representation
         cls_output = outputs.pooler_output
         cls_output = self.dropout(cls_output)
-        logits = self.classifier(cls_output)
-        return logits
+        return self.classifier(cls_output)
 
 # Loss: CrossEntropyLoss | Regularization: Dropout(p=0.3)
-
-# num_classes=3: anxiety, depression, neutral
-
-# dropout=0.3 reduces overfitting on small datasets
+# num_classes=2: neutral (0), mental_health (1)
+# dropout=0.3 reduces overfitting
