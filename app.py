@@ -1,18 +1,10 @@
-import streamlit as st
+import gradio as gr
 import torch
 import torch.nn as nn
 from transformers import BertTokenizer, BertModel
 from huggingface_hub import hf_hub_download
 import re
 
-# Page config
-st.set_page_config(
-    page_title="Mental Health Signal Detection",
-    page_icon="",
-    layout="centered"
-)
-
-# Model definition
 class MentalHealthClassifier(nn.Module):
     def __init__(self, num_classes=2, dropout=0.3):
         super(MentalHealthClassifier, self).__init__()
@@ -33,20 +25,21 @@ def clean_text(text):
     text = re.sub(r"\s+", " ", text).strip()
     return text.lower()
 
-@st.cache_resource
-def load_model():
-    device = torch.device("cpu")
-    tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-    model = MentalHealthClassifier(num_classes=2, dropout=0.3)
-    checkpoint_path = hf_hub_download(
-        repo_id="Delaviz/mental-health-bert",
-        filename="checkpoint_real_epoch4_valf1_0.9641.pt"
-    )
-    model.load_state_dict(torch.load(checkpoint_path, map_location="cpu"))
-    model.eval()
-    return model, tokenizer, device
+print("Loading model...")
+device = torch.device("cpu")
+tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+model = MentalHealthClassifier(num_classes=2, dropout=0.3)
+checkpoint_path = hf_hub_download(
+    repo_id="Delaviz/mental-health-bert",
+    filename="checkpoint_real_epoch4_valf1_0.9641.pt"
+)
+model.load_state_dict(torch.load(checkpoint_path, map_location="cpu"))
+model.eval()
+print("Model loaded!")
 
-def predict(text, model, tokenizer, device):
+def predict(text):
+    if not text.strip():
+        return {"Neutral": 0.0, "Mental Health Signal": 0.0}
     cleaned = clean_text(text)
     encoding = tokenizer(
         cleaned,
@@ -60,75 +53,38 @@ def predict(text, model, tokenizer, device):
             encoding["input_ids"].to(device),
             encoding["attention_mask"].to(device)
         )
-    probs = torch.softmax(logits, dim=1).squeeze()
-    pred = torch.argmax(probs).item()
-    return pred, probs[pred].item(), probs.tolist()
+    probs = torch.softmax(logits, dim=1).squeeze().tolist()
+    return {"Neutral": round(probs[0], 4), "Mental Health Signal": round(probs[1], 4)}
 
-# UI
-st.title("Mental Health Signal Detection")
-st.markdown(
-    "This tool uses a fine-tuned BERT model trained on 27,924 real Reddit posts "
-    "to detect potential mental health signals in text. "
-    "**Not a clinical tool. For research purposes only.**"
-)
-
-st.divider()
-
-example_texts = [
+examples = [
     "I have been feeling so empty and hopeless lately. Nothing brings me joy anymore.",
     "Just got back from the grocery store. Made pasta for dinner, it was pretty good.",
     "I cant stop worrying about everything. My chest feels tight all the time.",
+    "Started learning guitar last month. It is challenging but really fun so far.",
+    "I feel like a burden to everyone around me. Life feels completely meaningless.",
 ]
 
-st.markdown("**Try an example or type your own:**")
-col1, col2, col3 = st.columns(3)
-if col1.button("Example 1"):
-    st.session_state.input_text = example_texts[0]
-if col2.button("Example 2"):
-    st.session_state.input_text = example_texts[1]
-if col3.button("Example 3"):
-    st.session_state.input_text = example_texts[2]
+demo = gr.Interface(
+    fn=predict,
+    inputs=gr.Textbox(
+        lines=5,
+        placeholder="Type or paste a Reddit-style post here...",
+        label="Input Text"
+    ),
+    outputs=gr.Label(
+        num_top_classes=2,
+        label="Prediction"
+    ),
+    title="Mental Health Signal Detection",
+    description="""Fine-tuned BERT model trained on 27,924 real Reddit posts to detect mental health signals in text.
 
-user_input = st.text_area(
-    "Enter text to analyze:",
-    value=st.session_state.get("input_text", ""),
-    height=150,
-    placeholder="Type or paste a Reddit-style post here..."
+Not a clinical tool. For research purposes only.
+
+Model achieves 96% macro F1 on held-out test set of 4,189 posts.
+
+Built by Ayesha Dawodi | GitHub: https://github.com/dlawiz83/mental-health-nlp""",
+    examples=examples,
+    theme=gr.themes.Soft()
 )
 
-if st.button("Analyze", type="primary"):
-    if not user_input.strip():
-        st.warning("Please enter some text first.")
-    else:
-        with st.spinner("Loading model and analyzing..."):
-            model, tokenizer, device = load_model()
-            pred, confidence, probs = predict(user_input, model, tokenizer, device)
-
-        labels = ["Neutral", "Mental Health Signal"]
-        colors = ["#2ecc71", "#e74c3c"]
-        label = labels[pred]
-        color = colors[pred]
-
-        st.divider()
-        st.markdown(f"### Result: :{color}[{label}]")
-
-        col1, col2 = st.columns(2)
-        col1.metric("Prediction", label)
-        col2.metric("Confidence", f"{confidence*100:.1f}%")
-
-        st.markdown("**Confidence scores:**")
-        for i, (lbl, prob) in enumerate(zip(labels, probs)):
-            st.progress(prob, text=f"{lbl}: {prob*100:.1f}%")
-
-        st.divider()
-        st.caption(
-            "This model was trained on English Reddit posts and may not generalize "
-            "to all demographics or writing styles. It should never be used for "
-            "clinical diagnosis or intervention."
-        )
-
-st.divider()
-st.markdown(
-    "[GitHub](https://github.com/dlawiz83/mental-health-nlp) | "
-    "[Model on HF](https://huggingface.co/Delaviz/mental-health-bert)"
-)
+demo.launch()
