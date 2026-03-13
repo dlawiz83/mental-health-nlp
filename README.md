@@ -73,7 +73,7 @@ python src/train.py --lr 2e-5 --epochs 4 --batch_size 16 --dropout 0.3
 - BERT: Pre-trained on large corpus, understands nuanced emotional context
 
 ## 📦 Dataset
-- **Source:** [Mental Health Corpus](https://www.kaggle.com/datasets/reihanenamdari/mental-health-corpus) — Reddit posts
+- **Source:** [Mental Health Corpus](https://www.kaggle.com/datasets/reihanenamdari/mental-health-corpus) — real Reddit posts
 - **Size:** 27,924 posts after cleaning
 - **Classes:** neutral (0), mental_health (1)
 - **Split:** 70% train / 15% val / 15% test (stratified)
