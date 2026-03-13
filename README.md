@@ -112,4 +112,4 @@ Tests cover: URL removal, lowercasing, dataset split sizes, label classes.
 - This repo: MIT
 
 ## 👤 Author
-**Ayesha Dawodi** — [LinkedIn](https://linkedin.com/in/ayesha-dawodi) | [Portfolio](https://ayeshadawodi.vercel.app)
+**Ayesha Dawodi**
