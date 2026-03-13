@@ -9,6 +9,9 @@ A BERT-based NLP classifier that detects mental health signals in real Reddit po
 ## Live Demo
 https://huggingface.co/spaces/Delaviz/mental-health-detector
 
+## Demo Video
+https://youtu.be/W-JYSohQmGE
+
 ## Motivation
 Over 1 billion people globally are affected by mental health conditions, yet most go undetected. This project explores whether NLP can identify early signals from social media text — while being transparent about ethical limitations.
 
