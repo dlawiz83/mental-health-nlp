@@ -1,13 +1,40 @@
+# Mental Health Signal Detection from Reddit Posts
+
+![Python](https://img.shields.io/badge/Python-3.10-blue)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.10.0-orange)
+![License](https://img.shields.io/badge/License-MIT-green)
+
+A BERT-based NLP classifier that detects mental health signals in real Reddit posts. Built as an end-to-end ML project with real-world data, full experiment tracking, unit tests, and error analysis.
+
+## Live Demo
+https://huggingface.co/spaces/Delaviz/mental-health-detector
+
+## Motivation
+Over 1 billion people globally are affected by mental health conditions, yet most go undetected. This project explores whether NLP can identify early signals from social media text — while being transparent about ethical limitations.
+
+## Project Structure
+
+    mental-health-nlp/
+    ├── src/
+    │   ├── preprocess.py    # Data cleaning, dataset building, train/val/test split
+    │   ├── model.py         # BERT-base-uncased + classification head
+    │   └── train.py         # Full training loop with W&B tracking + early stopping
+    ├── tests/
+    │   └── test_preprocess.py  # Unit tests for data pipeline
+    ├── assets/
+    │   └── confusion_matrix_real.png
+    ├── requirements.txt
+    └── README.md
+
 ## Setup
-```bash
-pip install -r requirements.txt
-```
-**Environment:** Python 3.10 | CUDA 12.8 (T4 GPU on Google Colab) | PyTorch 2.10.0
+
+    pip install -r requirements.txt
+
+Environment: Python 3.10 | CUDA 12.8 (T4 GPU on Google Colab) | PyTorch 2.10.0
 
 ## Training
-```bash
-python src/train.py --lr 2e-5 --epochs 4 --batch_size 16 --dropout 0.3
-```
+
+    python src/train.py --lr 2e-5 --epochs 4 --batch_size 16 --dropout 0.3
 
 | Parameter | Value | Search Range |
 |---|---|---|
@@ -90,9 +117,9 @@ The model is conservative on ambiguous cases and aggressive on mild emotional la
 All runs tracked with Weights & Biases: https://wandb.ai/ayeshadawodi83/mental-health-nlp
 
 ## Tests
-```bash
-python tests/test_preprocess.py
-```
+
+    python tests/test_preprocess.py
+
 Tests cover: URL removal, lowercasing, dataset split sizes, label classes.
 
 ## Ethical Considerations
@@ -107,4 +134,4 @@ Tests cover: URL removal, lowercasing, dataset split sizes, label classes.
 - This repo: MIT
 
 ## Author
-**Ayesha Dawodi**
+**Ayesha Dawodi** 
