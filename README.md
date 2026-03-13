@@ -1,17 +1,13 @@
 # Mental Health Signal Detection from Reddit Posts
 
 ![Python](https://img.shields.io/badge/Python-3.10-blue)
-![PyTorch](https://img.shields.io/badge/PyTorch-2.0.1-orange)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.10.0-orange)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-A BERT-based NLP classifier that detects mental health signals — **depression, anxiety, or neutral** — in Reddit-style text posts. Built as an end-to-end ML project with full experiment tracking, unit tests, and error analysis.
-
----
+A BERT-based NLP classifier that detects mental health signals in real Reddit posts. Built as an end-to-end ML project with real-world data, full experiment tracking, unit tests, and error analysis.
 
 ## 🎯 Motivation
 Over 1 billion people globally are affected by mental health conditions, yet most go undetected. This project explores whether NLP can identify early signals from social media text — while being transparent about ethical limitations.
-
----
 
 ## 📁 Project Structure
 ```
@@ -22,30 +18,23 @@ mental-health-nlp/
 │   └── train.py         # Full training loop with W&B tracking + early stopping
 ├── tests/
 │   └── test_preprocess.py  # Unit tests for data pipeline
-├── requirements.txt     # All dependencies with pinned versions
+├── assets/
+│   └── confusion_matrix_real.png
+├── requirements.txt
 └── README.md
 ```
-
----
 
 ## ⚙️ Setup
 ```bash
 pip install -r requirements.txt
 ```
-
-**Environment:**
-- Python 3.10
-- CUDA 11.8 (T4 GPU on Google Colab)
-- PyTorch 2.0.1
-
----
+**Environment:** Python 3.10 | CUDA 12.8 (T4 GPU on Google Colab) | PyTorch 2.10.0
 
 ## 🚀 Training
 ```bash
 python src/train.py --lr 2e-5 --epochs 4 --batch_size 16 --dropout 0.3
 ```
 
-**Key hyperparameters:**
 | Parameter | Value | Search Range |
 |---|---|---|
 | Learning rate | 2e-5 | 1e-5 to 5e-5 |
@@ -53,28 +42,27 @@ python src/train.py --lr 2e-5 --epochs 4 --batch_size 16 --dropout 0.3
 | Dropout | 0.3 | 0.1 to 0.5 |
 | Max token length | 128 | 64 to 512 |
 
----
-
 ## 📊 Results
+
 | Split | Loss | Macro F1 |
 |---|---|---|
-| Train | 0.0069 | 1.0000 |
-| Val | 0.0045 | 1.0000 |
-| Test | 0.0045 | 1.0000 |
+| Train | 0.0210 | 0.9951 |
+| Val | 0.1958 | 0.9641 |
+| **Test** | — | **0.9600** |
 
-> ⚠️ Perfect F1 reflects overfitting due to small, repetitive dataset (900 samples, 10 base sentences per class). See Error Analysis below.
-
----
-
+| Class | Precision | Recall | F1 | Support |
+|---|---|---|---|---|
+| neutral | 0.96 | 0.96 | 0.96 | 2,116 |
+| mental_health | 0.96 | 0.96 | 0.96 | 2,073 |
 
 ## 🔢 Confusion Matrix
-![Confusion Matrix](assets/confusion_matrix.png)
+![Confusion Matrix](assets/confusion_matrix_real.png)
 
 ## 🏗️ Model Architecture
 - **Base:** BERT-base-uncased (110M parameters)
-- **Head:** Linear(768 → 3 classes)
+- **Head:** Linear(768 → 2 classes)
 - **Regularization:** Dropout(p=0.3)
-- **Loss:** Weighted Cross-Entropy
+- **Loss:** Cross-Entropy
 - **Optimizer:** AdamW (lr=2e-5, weight_decay=0.01)
 - **Scheduler:** Linear warmup (10% of steps)
 - **Early stopping:** Patience = 3 epochs on val F1
@@ -82,38 +70,29 @@ python src/train.py --lr 2e-5 --epochs 4 --batch_size 16 --dropout 0.3
 **Why BERT over alternatives:**
 - BiLSTM: Cannot capture long-range dependencies; no pre-training benefit
 - TF-IDF + LogReg: Loses word order and contextual meaning entirely
-- BERT : Pre-trained on large corpus, understands nuanced emotional context
-
----
+- BERT: Pre-trained on large corpus, understands nuanced emotional context
 
 ## 📦 Dataset
-- **Size:** 900 samples (300 per class)
-- **Classes:** depression, anxiety, neutral
+- **Source:** [Mental Health Corpus](https://www.kaggle.com/datasets/reihanenamdari/mental-health-corpus) — Reddit posts
+- **Size:** 27,924 posts after cleaning
+- **Classes:** neutral (0), mental_health (1)
 - **Split:** 70% train / 15% val / 15% test (stratified)
-- **Source:** Constructed from representative Reddit-style posts
-- **License:** CC0 Public Domain
+- **License:** CC BY 4.0
 - **Cleaning:** Lowercased, URLs removed, special characters stripped, truncated to 128 tokens
 
----
-
 ## 🔍 Error Analysis
-**Key failure mode:** Anxiety vs Depression confusion due to overlapping vocabulary.
+**Key failure mode:** Neutral posts with emotionally charged language misclassified as mental health.
 
 Example hard case:
-- Text: *"i cant sleep and feel so overwhelmed and hopeless"*
-- True label: `anxiety`
-- Predicted: `depression`
-- Reason: "hopeless" strongly associated with depression class
+- **Text:** *"i cant sleep and feel so overwhelmed and hopeless"*
+- **True label:** neutral
+- **Predicted:** mental_health
+- **Reason:** "hopeless" and "overwhelmed" strongly associated with mental health class
 
-**Fix attempted:** Weighted cross-entropy loss + dropout regularization
-
----
+**Fix attempted:** Dropout regularization (p=0.3) + gradient clipping (max_norm=1.0)
 
 ## 📈 Experiment Tracking
-All runs tracked with Weights & Biases:
- https://wandb.ai/ayeshadawodi83/mental-health-nlp
-
----
+All runs tracked with Weights & Biases: https://wandb.ai/ayeshadawodi83/mental-health-nlp
 
 ## 🧪 Tests
 ```bash
@@ -121,20 +100,16 @@ python tests/test_preprocess.py
 ```
 Tests cover: URL removal, lowercasing, dataset split sizes, label classes.
 
----
-
 ## ⚖️ Ethical Considerations
-- Dataset limited to English, Western social media style — may not generalize globally
+- Dataset limited to English Reddit — may not generalize globally
 - Model should **NOT** be used for clinical diagnosis
 - Bias: performance may degrade on posts from underrepresented demographics
 - All limitations documented transparently
 
 **Licenses:**
 - BERT-base: Apache 2.0
-- Dataset: CC0 Public Domain
-- This repo: MIT (compatible with all dependencies)
-
----
+- Dataset: CC BY 4.0
+- This repo: MIT
 
 ## 👤 Author
-**Ayesha Dawodi**
+**Ayesha Dawodi** — [LinkedIn](https://linkedin.com/in/ayesha-dawodi) | [Portfolio](https://ayeshadawodi.vercel.app)
