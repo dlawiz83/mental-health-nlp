@@ -1,0 +1,35 @@
+BASELINE RESULTS — Mental Health Signal Detection
+Dataset: Kaggle Mental Health Corpus, 27,924 posts
+Split: 70/15/15 stratified, random_state=42
+
+=== TF-IDF + Logistic Regression ===
+              precision    recall  f1-score   support
+     neutral     0.9224    0.9221    0.9221      2116
+mental_health     0.9221    0.9224    0.9221      2073
+    macro avg     0.9224    0.9221    0.9221      4189
+
+=== TF-IDF + SVM ===
+              precision    recall  f1-score   support
+     neutral     0.9288    0.9285    0.9286      2116
+mental_health     0.9285    0.9288    0.9286      2073
+    macro avg     0.9288    0.9285    0.9286      4189
+
+=== BiLSTM + GloVe (100d) ===
+              precision    recall  f1-score   support
+     neutral     0.9531    0.9121    0.9321      2116
+mental_health     0.9140    0.9542    0.9337      2073
+    macro avg     0.9336    0.9331    0.9329      4189
+    accuracy                         0.9329      4189
+
+=== BERT-base-uncased (ours) ===
+              precision    recall  f1-score   support
+     neutral     0.96      0.96      0.96       2116
+mental_health     0.96      0.96      0.96       2073
+    macro avg     0.96      0.96      0.96       4189
+    accuracy                         0.9600      4189
+
+MODEL COMPARISON — MACRO F1 ON TEST SET
+TF-IDF + Logistic Regression : 0.9221
+TF-IDF + SVM                 : 0.9286
+BiLSTM + GloVe               : 0.9329
+BERT-base-uncased            : 0.9600
