@@ -101,10 +101,10 @@ Manual testing on 5 unseen examples after deployment:
 
 | Text | True Label | Predicted | Confidence |
 |---|---|---|---|
-| "I haven't left my room in days. Everything feels pointless..." | Mental Health | Neutral | 74% |
+| "I haven't left my room in days. Everything feels pointless..." | Mental Health | Mental Health | 99% |
 | "Just finished a really good book. Looking for recommendations..." | Neutral | Neutral | 100% |
 | "I was so stressed about my exam but I feel much better now..." | Neutral | Neutral | 100% |
-| "I keep having panic attacks at work. I am terrified to go back..." | Mental Health | Mental Health | 98% |
+| "I keep having panic attacks at work. I am terrified to go back..." | Mental Health | Mental Health | 99% |
 | "Feeling a bit down today but I think a walk will help..." | Neutral | Mental Health | 93% |
 
 **Key observations:**
